@@ -1,5 +1,8 @@
 FROM php:7.4-fpm
 
+# Set working directory
+WORKDIR /var/www
+
 # Arguments defined in docker-compose.yml
 ARG user
 ARG uid
@@ -12,7 +15,8 @@ RUN apt-get update && apt-get install -y \
     libonig-dev \
     libxml2-dev \
     zip \
-    unzip
+    unzip \
+    nginx
 
 # Clear cache
 RUN apt-get clean && rm -rf /var/lib/apt/lists/*
@@ -24,11 +28,14 @@ RUN docker-php-ext-install pdo_mysql mbstring exif pcntl bcmath gd
 COPY --from=composer:latest /usr/bin/composer /usr/bin/composer
 
 # Create system user to run Composer and Artisan Commands
-RUN useradd -G www-data,root -u $uid -d /home/$user $user
-RUN mkdir -p /home/$user/.composer && \
-    chown -R $user:$user /home/$user
+RUN useradd -G www-data,root -u 1000 -d /home/doe doe
+RUN mkdir -p /home/doe/.composer && \
+    chown -R doe:doe /home/doe
 
-# Set working directory
-WORKDIR /var/www
+# Copy code to /var/www
+COPY --chown=www-data:www-data . /var/www
 
-USER $user
+RUN cp docker-compose/nginx /etc/nginx/conf.d
+
+
+USER doe
