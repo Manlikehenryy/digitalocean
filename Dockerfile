@@ -32,6 +32,8 @@ RUN useradd -G www-data,root -u 1000 -d /home/doe doe
 RUN mkdir -p /home/doe/.composer && \
     chown -R doe:doe /home/doe
 
+# add root to www group
+RUN chmod -R ug+w /var/www/storage
 # Copy code to /var/www
 COPY --chown=www-data:www-data . /var/www
 
